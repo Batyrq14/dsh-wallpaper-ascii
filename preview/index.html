@@ -413,8 +413,8 @@
             <div class="assistant-mark">N</div>
             <div class="assistant-copy">
               <p><strong>Nocturne</strong> is a small client plugin that mounts a canvas behind the conversation. Five ASCII scenes rotate on a thirty-two second loop: cloud drift, koi pond, jellyfish, fireflies, and a moonlit lake.</p>
-              <div class="command">dsh plugin --profile desktop add dsh-nocturne-wallpaper</div>
-              <p class="quiet">It renders at a capped 30 fps, pauses when the window is hidden, and keeps the character grid quiet enough to read through.</p>
+              <div class="command">dsh plugin --profile desktop add github:Batyrq14/dsh-wallpaper-ascii</div>
+              <p class="quiet">Open the Nocturne pill in the lower-right corner to choose a scene, hold the motion, or soften the veil. It renders at a capped 30 fps and pauses when the window is hidden.</p>
               <div class="hint-row">
                 <span class="hint"><b>alt</b> + 1–5 &nbsp;scene</span>
                 <span class="hint"><b>alt</b> + ← → &nbsp;cycle</span>
@@ -488,7 +488,6 @@
       }
 
       if (window.nocturneWallpaper) {
-        window.nocturneWallpaper.show(2);
         syncSceneLabel();
         window.setInterval(syncSceneLabel, 800);
       }

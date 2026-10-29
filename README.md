@@ -1,10 +1,17 @@
 # Nocturne Wallpaper
 
-A small, self-contained **DeepSeek Harness web-client plugin** that paints a living ASCII wallpaper behind the chat.
+A small, self-contained **DeepSeek Harness web-client plugin** that paints a living ASCII wallpaper behind the chat, with a compact appearance panel for changing it without touching code.
 
-Five scenes rotate on a slow loop: **Cloud Drift**, **Koi Pond**, **Jellyfish**, **Fireflies**, and **Moonlit**. Everything is drawn on a single full-screen canvas at a capped 30 fps. At runtime it uses no images, videos, web fonts, or network requests, and the package needs no build step.
+Five scenes rotate on a slow loop: **Cloud Drift**, **Koi Pond**, **Jellyfish**, **Fireflies**, and **Moonlit**. Everything is drawn on a single full-screen canvas at a capped 30 fps. Open the Nocturne pill in the lower-right corner to pick a scene, pause motion, soften the wallpaper, or switch it off entirely. At runtime it uses no images, videos, web fonts, or network requests, and the package needs no build step.
 
 ![Nocturne running behind a mock DeepSeek Harness conversation](docs/preview.png)
+
+<details>
+<summary>Appearance panel</summary>
+
+![The Nocturne appearance panel open over the chat](docs/preview-panel.png)
+
+</details>
 
 <details>
 <summary>Another scene: Moonlit</summary>
@@ -18,15 +25,19 @@ Five scenes rotate on a slow loop: **Cloud Drift**, **Koi Pond**, **Jellyfish**,
 ## What it does
 
 - Mounts a fixed character-grid canvas behind the DSH web UI.
+- Opens a compact shadow-DOM appearance panel from the Nocturne pill in the corner.
+- Lets you pick any of the five scenes, toggle auto-cycle and animation, and adjust wallpaper visibility.
+- Turns the canvas layer off without uninstalling the plugin.
 - Makes the application base layer translucent so the wallpaper shows through the conversation.
 - Adds a theme-aware tint, and a light wash in the light theme, so chat text stays readable.
 - Keeps message bubbles and the composer slightly translucent to match.
 - Rotates scenes every 32 seconds with a 1.35 second crossfade.
 - Pauses automatically when the tab is hidden.
 - Respects `prefers-reduced-motion`: motion slows down and auto-rotation starts off.
+- Remembers scene, motion, enabled state, and visibility in `localStorage`.
 - Removes every node, stylesheet, listener, and inline attribute when the plugin unloads.
 
-No chat content is read. No settings are stored. No network calls are made.
+No chat content is read and no network calls are made. Only wallpaper preferences are stored locally.
 
 ## Install
 
@@ -58,7 +69,9 @@ Restart to return to the stock background.
 
 ## Controls
 
-The wallpaper is intentionally chrome-free. Scene changes use keyboard shortcuts, and are ignored while typing in an input, textarea, select, or contenteditable field.
+Click the **Nocturne** pill in the lower-right corner to open the appearance panel. It includes scene selection, auto-cycle, animation, wallpaper visibility, and an on/off switch for the canvas layer.
+
+Scene changes also work from the keyboard. Shortcuts are ignored while typing in an input, textarea, select, or contenteditable field.
 
 | Shortcut | Action |
 | --- | --- |
@@ -71,7 +84,7 @@ The same controls are available from the console through `window.nocturneWallpap
 
 ```js
 nocturneWallpaper.scenes                // ["Cloud Drift", "Koi Pond", ...]
-nocturneWallpaper.status()              // { index, name, paused, auto }
+nocturneWallpaper.status()              // { index, name, paused, auto, enabled, visibility }
 nocturneWallpaper.show("Moonlit")       // also accepts a 0-based index
 nocturneWallpaper.next()
 nocturneWallpaper.previous()
@@ -80,6 +93,12 @@ nocturneWallpaper.resume()
 nocturneWallpaper.togglePause()
 nocturneWallpaper.setAuto(false)        // pin the current scene
 nocturneWallpaper.toggleAuto()
+nocturneWallpaper.enable()              // show the canvas layer
+nocturneWallpaper.disable()             // hide the canvas layer
+nocturneWallpaper.toggleEnabled()
+nocturneWallpaper.setVisibility(78)     // 0-100; higher makes the wallpaper stronger
+nocturneWallpaper.openPanel()
+nocturneWallpaper.closePanel()
 ```
 
 ## How it works
@@ -99,13 +118,14 @@ At mount time the browser half:
 1. Appends `#nocturne-canvas` and `#nocturne-wash` to the body at negative z-index.
 2. Sets `data-nocturne="on"` on the body and makes the UI base layer translucent.
 3. Tints the application root so the wallpaper is atmospheric rather than distracting.
-4. Starts a 30 fps character-grid renderer.
+4. Mounts the shadow-DOM appearance panel and its trigger.
+5. Starts a 30 fps character-grid renderer.
 
 All of it is wrapped in `ctx.effect(...)`, so a hot reload or plugin removal restores the original UI.
 
 ### Readability
 
-The wallpaper sits beneath a theme-aware veil and a tinted app root. The dark theme uses a subtle dark tint; the light theme uses a warm paper wash so dark text remains legible. Bubble and composer surfaces are kept at high opacity. If you want to tune the effect, override `--nocturne-app-tint` after the plugin's stylesheet in your own theme CSS.
+The wallpaper sits beneath a theme-aware veil and a tinted app root. The dark theme uses a subtle dark tint; the light theme uses a warm paper wash so dark text remains legible. Bubble and composer surfaces are kept at high opacity. The **Wallpaper visibility** slider adjusts that tint; scene selection and motion live in the same panel. If you want to tune the effect further, override `--nocturne-app-tint` after the plugin's stylesheet in your own theme CSS.
 
 ## Performance
 
@@ -114,7 +134,7 @@ The wallpaper sits beneath a theme-aware veil and a tinted app root. The dark th
 - Device pixel ratio capped at 1.6 and total canvas pixels capped at 8.5M.
 - Rendering stops while the tab is hidden.
 - Particle tables are seeded and reused; no network or image decoding happens while running.
-- No continuous CSS filter or backdrop-filter work is added by the plugin itself.
+- The appearance panel is static DOM; no continuous CSS filter or backdrop-filter work is added by the plugin itself.
 
 ## Compatibility
 
