@@ -1,0 +1,6 @@
+# dsh-nocturne-wallpaper bundle patch.
+# Inserts this package's Loader row. The Web client-modules scanner reads the
+# package's dsh.client manifest and serves lib/client.js into the page boot.
+- insert:
+    - id: nocturne-wallpaper
+      name: dsh-nocturne-wallpaper

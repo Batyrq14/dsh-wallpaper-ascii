@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07090b">
+<title>Nocturne Wallpaper — DSH plugin preview</title>
+<style>
+  :root {
+    --dsw-static-neutral-bluish-00: #ffffff;
+    --dsw-static-neutral-bluish-850: #25272d;
+    --dsw-alias-bg-base: rgba(9, 11, 14, .78);
+    --dsw-specific-input-major: #202329;
+    --dsw-specific-bubble: #25282f;
+    --dsw-alias-border-l1: rgba(255, 255, 255, .11);
+    --dsw-alias-label-primary: #f3f0e6;
+    --dsw-alias-label-secondary: rgba(243, 240, 230, .56);
+    --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+    --mono: "SFMono-Regular", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: #07090b;
+    color: var(--dsw-alias-label-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button { font: inherit; }
+  #root {
+    height: 100%;
+    display: flex;
+    background: var(--dsw-alias-bg-base);
+  }
+
+  .sidebar {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 264px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 18px 15px 14px;
+    background: rgba(9, 10, 12, .93);
+    border-right: 1px solid rgba(255, 255, 255, .065);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 7px 2px;
+    user-select: none;
+  }
+
+  .brand-mark {
+    display: grid;
+    grid-template-columns: repeat(3, 3px);
+    grid-template-rows: repeat(3, 3px);
+    gap: 2px;
+    width: 13px;
+    height: 13px;
+  }
+  .brand-mark i { background: rgba(243, 240, 230, .2); }
+  .brand-mark i:nth-child(2), .brand-mark i:nth-child(6), .brand-mark i:nth-child(8) { background: rgba(243, 240, 230, .4); }
+  .brand-mark i:nth-child(5) { background: #c4dcdf; }
+
+  .brand-copy { display: flex; flex-direction: column; gap: 4px; }
+  .brand-name { font-size: 10px; line-height: 1; font-weight: 650; letter-spacing: .19em; }
+  .brand-sub { font-size: 7px; line-height: 1; letter-spacing: .16em; text-transform: uppercase; color: rgba(243, 240, 230, .38); }
+
+  .new-chat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 11px;
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, .045);
+    color: rgba(243, 240, 230, .86);
+    font-size: 11px;
+    letter-spacing: .02em;
+    cursor: default;
+  }
+  .new-chat span:last-child { color: rgba(243, 240, 230, .32); font-family: var(--mono); font-size: 12px; }
+
+  .nav-label {
+    padding: 0 8px;
+    font-family: var(--mono);
+    font-size: 7px;
+    letter-spacing: .17em;
+    text-transform: uppercase;
+    color: rgba(243, 240, 230, .3);
+  }
+
+  .session-list { display: flex; flex-direction: column; gap: 2px; }
+  .session {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 10px 11px;
+    border-radius: 8px;
+    color: rgba(243, 240, 230, .55);
+  }
+  .session.active {
+    background: rgba(255, 255, 255, .055);
+    color: rgba(243, 240, 230, .94);
+  }
+  .session-title { font-size: 11px; letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .session-meta { font-family: var(--mono); font-size: 6.5px; letter-spacing: .12em; text-transform: uppercase; color: rgba(243, 240, 230, .26); }
+  .session.active .session-meta { color: #b9d7d8; }
+
+  .sidebar-foot {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 8px 2px;
+    border-top: 1px solid rgba(255, 255, 255, .065);
+    font-family: var(--mono);
+    font-size: 7px;
+    line-height: 1.5;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+    color: rgba(243, 240, 230, .3);
+  }
+  .status-dot { width: 4px; height: 4px; border-radius: 50%; background: #b6d9c2; box-shadow: 0 0 7px rgba(182, 217, 194, .7); }
+
+  .main {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--dsw-alias-bg-base);
+  }
+
+  .topbar {
+    position: relative;
+    z-index: 1;
+    height: 57px;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, .055);
+    background: linear-gradient(to bottom, rgba(7, 9, 11, .54), rgba(7, 9, 11, .12) 80%, transparent);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .session-heading { display: flex; flex-direction: column; gap: 4px; }
+  .session-heading strong { font-size: 12px; font-weight: 560; letter-spacing: .01em; }
+  .session-heading span { font-family: var(--mono); font-size: 6.5px; letter-spacing: .15em; text-transform: uppercase; color: rgba(243, 240, 230, .35); }
+
+  .top-status {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 9px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 999px;
+    background: rgba(8, 10, 12, .28);
+    font-family: var(--mono);
+    font-size: 6.5px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: rgba(243, 240, 230, .44);
+    backdrop-filter: blur(10px);
+  }
+  .top-status i { width: 4px; height: 4px; border-radius: 50%; background: #c4dcdf; }
+  .top-more { color: rgba(243, 240, 230, .36); font-family: var(--mono); font-size: 13px; letter-spacing: .2em; }
+
+  .messages {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    overflow-y: auto;
+    padding: 66px max(28px, calc((100% - 812px) / 2)) 180px;
+    scrollbar-width: none;
+  }
+  .messages::-webkit-scrollbar { display: none; }
+  .message-thread { display: flex; flex-direction: column; gap: 30px; }
+  .user-row { display: flex; justify-content: flex-end; }
+  .user-bubble {
+    max-width: 520px;
+    padding: 11px 15px;
+    border: 1px solid rgba(255, 255, 255, .07);
+    border-radius: 15px 15px 3px 15px;
+    background: var(--dsw-specific-bubble);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: rgba(243, 240, 230, .92);
+    text-shadow: 0 1px 12px rgba(0, 0, 0, .2);
+  }
+  .assistant-row { display: flex; align-items: flex-start; gap: 13px; }
+  .assistant-mark {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    margin-top: 2px;
+    border: 1px solid rgba(255, 255, 255, .13);
+    border-radius: 50%;
+    background: rgba(7, 9, 11, .38);
+    font-family: var(--serif);
+    font-size: 13px;
+    font-style: italic;
+    color: #e6e3d5;
+    backdrop-filter: blur(9px);
+  }
+  .assistant-copy {
+    max-width: 680px;
+    font-size: 14px;
+    line-height: 1.65;
+    color: rgba(245, 242, 233, .9);
+    text-shadow: 0 1px 14px rgba(0, 0, 0, .4);
+  }
+  .assistant-copy p { margin: 0 0 15px; }
+  .assistant-copy p:last-child { margin-bottom: 0; }
+  .assistant-copy strong { color: #fffdf4; font-weight: 590; }
+  .quiet { color: rgba(243, 240, 230, .58); }
+
+  .command {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin: 18px 0;
+    padding: 12px 13px;
+    border: 1px solid rgba(255, 255, 255, .09);
+    border-radius: 9px;
+    background: rgba(6, 8, 10, .38);
+    box-shadow: 0 14px 38px rgba(0, 0, 0, .12);
+    font-family: var(--mono);
+    font-size: 9px;
+    line-height: 1.55;
+    letter-spacing: .02em;
+    color: rgba(243, 240, 230, .75);
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+  }
+  .command::before {
+    content: "$";
+    flex: none;
+    color: rgba(196, 220, 223, .58);
+  }
+
+  .hint-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 22px;
+  }
+  .hint {
+    padding: 5px 8px;
+    border: 1px solid rgba(255, 255, 255, .09);
+    border-radius: 4px;
+    background: rgba(7, 9, 11, .25);
+    font-family: var(--mono);
+    font-size: 6.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(243, 240, 230, .47);
+    backdrop-filter: blur(8px);
+  }
+  .hint b { font-weight: 400; color: rgba(243, 240, 230, .72); }
+
+  .composer-wrap {
+    position: absolute;
+    left: 50%;
+    bottom: 22px;
+    z-index: 2;
+    transform: translateX(-50%);
+    width: min(820px, calc(100% - 48px));
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .composer {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-height: 58px;
+    padding: 11px 13px 11px 17px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 17px;
+    background: var(--dsw-specific-input-major);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .035);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .composer-placeholder { flex: 1; font-size: 12.5px; color: rgba(243, 240, 230, .37); }
+  .composer-tools { display: flex; align-items: center; gap: 8px; }
+  .tool-dot {
+    display: grid;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 7px;
+    color: rgba(243, 240, 230, .4);
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+  .send-button {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(243, 240, 230, .9);
+    color: #101214;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  .composer-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 5px;
+    font-family: var(--mono);
+    font-size: 6.5px;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+    color: rgba(243, 240, 230, .28);
+  }
+  .composer-foot b { font-weight: 400; color: rgba(243, 240, 230, .45); }
+
+  .preview-note {
+    position: fixed;
+    left: 282px;
+    bottom: 10px;
+    z-index: 3;
+    font-family: var(--mono);
+    font-size: 6px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(243, 240, 230, .24);
+    pointer-events: none;
+  }
+
+  @media (max-width: 800px) {
+    .sidebar { display: none; }
+    .messages { padding: 46px 22px 175px; }
+    .topbar { padding: 0 20px; }
+    .composer-wrap { width: calc(100% - 28px); bottom: 14px; }
+    .preview-note { display: none; }
+    .composer-foot span:last-child { display: none; }
+    .user-bubble { max-width: 90%; }
+  }
+</style>
+</head>
+<body data-ds-dark-theme>
+  <div id="root" class="dsh-app">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="brand-copy">
+          <span class="brand-name">DEEPSEEK HARNESS</span>
+          <span class="brand-sub">Plugin preview</span>
+        </span>
+      </div>
+
+      <div class="new-chat"><span>New thread</span><span>+</span></div>
+
+      <div>
+        <div class="nav-label">Recents</div>
+        <div class="session-list" style="margin-top:7px">
+          <div class="session active">
+            <span class="session-title">Tuning the quiet</span>
+            <span class="session-meta">Nocturne · live</span>
+          </div>
+          <div class="session">
+            <span class="session-title">Client plugin notes</span>
+            <span class="session-meta">2h ago</span>
+          </div>
+          <div class="session">
+            <span class="session-title">A slower compositor</span>
+            <span class="session-meta">Yesterday</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-foot"><span class="status-dot"></span><span>Nocturne<br>alt 1–5 for scenes</span></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="session-heading">
+          <strong>Tuning the quiet</strong>
+          <span>DeepSeek Harness · local workspace</span>
+        </div>
+        <div class="top-status"><i></i><span id="scene-status">canvas 03</span></div>
+        <span class="top-more">···</span>
+      </header>
+
+      <section class="messages">
+        <div class="message-thread">
+          <div class="user-row">
+            <div class="user-bubble">Could we make the chat feel less like a blank room?</div>
+          </div>
+
+          <div class="assistant-row">
+            <div class="assistant-mark">N</div>
+            <div class="assistant-copy">
+              <p><strong>Nocturne</strong> is a small client plugin that mounts a canvas behind the conversation. Five ASCII scenes rotate on a thirty-two second loop: cloud drift, koi pond, jellyfish, fireflies, and a moonlit lake.</p>
+              <div class="command">dsh plugin --profile desktop add dsh-nocturne-wallpaper</div>
+              <p class="quiet">It renders at a capped 30 fps, pauses when the window is hidden, and keeps the character grid quiet enough to read through.</p>
+              <div class="hint-row">
+                <span class="hint"><b>alt</b> + 1–5 &nbsp;scene</span>
+                <span class="hint"><b>alt</b> + ← → &nbsp;cycle</span>
+                <span class="hint"><b>alt</b> + 0 &nbsp;hold</span>
+                <span class="hint"><b>alt</b> + a &nbsp;auto</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="user-row">
+            <div class="user-bubble">Good. Leave it running.</div>
+          </div>
+
+          <div class="assistant-row">
+            <div class="assistant-mark">N</div>
+            <div class="assistant-copy"><p class="quiet">It will. The scene changes; the room stays quiet.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="composer-wrap">
+        <div class="composer">
+          <span class="composer-placeholder">Ask anything…</span>
+          <span class="composer-tools">
+            <span class="tool-dot">+</span>
+            <span class="tool-dot">◇</span>
+            <span class="send-button">↑</span>
+          </span>
+        </div>
+        <div class="composer-foot">
+          <span><b>Nocturne</b> · <span id="scene-name">jellyfish</span></span>
+          <span>30 fps target · five studies</span>
+        </div>
+      </div>
+
+      <span class="preview-note">Local preview · mock shell · no chat data</span>
+    </main>
+  </div>
+
+  <script>
+    window.__ModuleLoader__ = {
+      load: function (entry) {
+        window.__nocturneModule = entry.factory(function (name) {
+          throw new Error("Unexpected module request: " + name);
+        });
+      }
+    };
+  </script>
+  <script src="../lib/client.js"></script>
+  <script>
+    (function () {
+      var cleanups = [];
+      var ctx = {
+        effect: function (factory) {
+          var cleanup = factory();
+          if (typeof cleanup === "function") cleanups.push(cleanup);
+          return cleanup;
+        }
+      };
+      window.__nocturneModule.apply(ctx);
+      window.__nocturneCleanup = function () {
+        while (cleanups.length > 0) cleanups.pop()();
+      };
+      function syncSceneLabel() {
+        if (!window.nocturneWallpaper) return;
+        var state = window.nocturneWallpaper.status();
+        var status = document.getElementById("scene-status");
+        var name = document.getElementById("scene-name");
+        if (status) status.textContent = "canvas " + String(state.index + 1).padStart(2, "0");
+        if (name) name.textContent = state.name.toLowerCase();
+      }
+
+      if (window.nocturneWallpaper) {
+        window.nocturneWallpaper.show(2);
+        syncSceneLabel();
+        window.setInterval(syncSceneLabel, 800);
+      }
+    })();
+  </script>
+</body>
+</html>
