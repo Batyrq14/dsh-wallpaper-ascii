@@ -43,5 +43,13 @@
   },
   "scripts": {
     "check": "node --check lib/index.js && node --check lib/client.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Batyrq14/dsh-wallpaper-ascii.git"
+  },
+  "homepage": "https://github.com/Batyrq14/dsh-wallpaper-ascii#readme",
+  "bugs": {
+    "url": "https://github.com/Batyrq14/dsh-wallpaper-ascii/issues"
   }
 }
