@@ -390,7 +390,7 @@
         </div>
       </div>
 
-      <div class="sidebar-foot"><span class="status-dot"></span><span>Nocturne<br>alt 1–5 for scenes</span></div>
+      <div class="sidebar-foot"><span class="status-dot"></span><span>Nocturne<br>/theme or alt 1–9</span></div>
     </aside>
 
     <main class="main">
@@ -412,11 +412,12 @@
           <div class="assistant-row">
             <div class="assistant-mark">N</div>
             <div class="assistant-copy">
-              <p><strong>Nocturne</strong> is a small client plugin that mounts a canvas behind the conversation. Five ASCII scenes rotate on a thirty-two second loop: cloud drift, koi pond, jellyfish, fireflies, and a moonlit lake.</p>
+              <p><strong>Nocturne</strong> is a small client plugin that mounts a canvas behind the conversation. Twelve ASCII studies rotate on a thirty-two second loop: five times of day, paper boats, a honu lagoon, koi, a blue whale, jellyfish, fireflies, and a moonlit lake.</p>
               <div class="command">dsh plugin --profile desktop add github:Batyrq14/dsh-wallpaper-ascii</div>
-              <p class="quiet">Open the Nocturne pill in the lower-right corner to choose a scene, hold the motion, or soften the veil. It renders at a capped 30 fps and pauses when the window is hidden.</p>
+              <p class="quiet">Type <strong>/theme</strong> in the composer for the native DSH scene picker, or use the Nocturne pill in the lower-right to hold motion and soften the veil.</p>
               <div class="hint-row">
-                <span class="hint"><b>alt</b> + 1–5 &nbsp;scene</span>
+                <span class="hint"><b>/theme</b> &nbsp;scene picker</span>
+                <span class="hint"><b>alt</b> + 1–9 &nbsp;scene</span>
                 <span class="hint"><b>alt</b> + ← → &nbsp;cycle</span>
                 <span class="hint"><b>alt</b> + 0 &nbsp;hold</span>
                 <span class="hint"><b>alt</b> + a &nbsp;auto</span>
@@ -446,7 +447,7 @@
         </div>
         <div class="composer-foot">
           <span><b>Nocturne</b> · <span id="scene-name">jellyfish</span></span>
-          <span>30 fps target · five studies</span>
+          <span>30 fps target · twelve studies</span>
         </div>
       </div>
 
@@ -467,11 +468,30 @@
   <script>
     (function () {
       var cleanups = [];
+      var commandUi = {
+        register: function (contribution) {
+          window.__nocturneThemeCommand = contribution;
+          return function () {
+            delete window.__nocturneThemeCommand;
+          };
+        }
+      };
       var ctx = {
         effect: function (factory) {
           var cleanup = factory();
           if (typeof cleanup === "function") cleanups.push(cleanup);
           return cleanup;
+        },
+        inject: function (names, callback) {
+          if (names.indexOf("commandUi") === -1) return;
+          callback({
+            commandUi: commandUi,
+            effect: function (factory) {
+              var cleanup = factory();
+              if (typeof cleanup === "function") cleanups.push(cleanup);
+              return cleanup;
+            }
+          });
         }
       };
       window.__nocturneModule.apply(ctx);

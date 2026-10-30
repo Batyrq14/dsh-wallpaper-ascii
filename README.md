@@ -1,8 +1,19 @@
 # Nocturne Wallpaper
 
-A small, self-contained **DeepSeek Harness web-client plugin** that paints a living ASCII wallpaper behind the chat, with a compact appearance panel for changing it without touching code.
+A small, self-contained **DeepSeek Harness web-client plugin** that paints a living ASCII wallpaper behind the chat, with a native `/theme` command and a compact appearance panel for changing it without touching code.
 
-Five scenes rotate on a slow loop: **Cloud Drift**, **Koi Pond**, **Jellyfish**, **Fireflies**, and **Moonlit**. Everything is drawn on a single full-screen canvas at a capped 30 fps. Open the Nocturne pill in the lower-right corner to pick a scene, pause motion, soften the wallpaper, or switch it off entirely. At runtime it uses no images, videos, web fonts, or network requests, and the package needs no build step.
+Twelve scenes rotate on a slow loop:
+
+- **Cloud Drift** in five lights: **Sunrise**, **Afternoon**, **Dusk**, **Evening**, and **Night**
+- **Paper Boats**
+- **Honu Lagoon**
+- **Koi Pond**
+- **DeepSeek** — a blue whale in the deep
+- **Jellyfish**
+- **Fireflies**
+- **Moonlit**
+
+Everything is drawn on a single full-screen canvas at a capped 30 fps. Type **`/theme`** in the DSH composer for the native scene picker, or open the **Nocturne** pill in the lower-right corner. At runtime the plugin uses no images, videos, web fonts, or network requests, and the package needs no build step.
 
 ![Nocturne running behind a mock DeepSeek Harness conversation](docs/preview.png)
 
@@ -14,9 +25,16 @@ Five scenes rotate on a slow loop: **Cloud Drift**, **Koi Pond**, **Jellyfish**,
 </details>
 
 <details>
-<summary>Another scene: Moonlit</summary>
+<summary>Honu Lagoon</summary>
 
-![Moonlit behind the chat](docs/preview-moonlit.png)
+![Honu Lagoon behind the chat](docs/preview-honu.png)
+
+</details>
+
+<details>
+<summary>DeepSeek, the blue whale</summary>
+
+![DeepSeek, a blue whale in the deep, behind the chat](docs/preview-deepseek.png)
 
 </details>
 
@@ -25,19 +43,21 @@ Five scenes rotate on a slow loop: **Cloud Drift**, **Koi Pond**, **Jellyfish**,
 ## What it does
 
 - Mounts a fixed character-grid canvas behind the DSH web UI.
+- Registers a client-owned **`/theme`** command in DSH's slash-command menu. It opens the native searchable scene picker, grouped by **Sky**, **Water**, **Deep**, and **Night**, with the current scene highlighted. Selecting a row changes the wallpaper without creating a model message.
 - Opens a compact shadow-DOM appearance panel from the Nocturne pill in the corner.
-- Lets you pick any of the five scenes, toggle auto-cycle and animation, and adjust wallpaper visibility.
+- Lets you pick any of the twelve scenes, toggle auto-cycle and animation, and adjust wallpaper visibility.
 - Turns the canvas layer off without uninstalling the plugin.
 - Makes the application base layer translucent so the wallpaper shows through the conversation.
 - Adds a theme-aware tint, and a light wash in the light theme, so chat text stays readable.
 - Keeps message bubbles and the composer slightly translucent to match.
-- Rotates scenes every 32 seconds with a 1.35 second crossfade.
+- Rotates scenes every 32 seconds.
+- Switches scenes with a 1.35 second **staggered ASCII dissolve**: the old scene is held in vertical strips that clear in a soft wave, while a thin accent seam travels across the grid.
 - Pauses automatically when the tab is hidden.
 - Respects `prefers-reduced-motion`: motion slows down and auto-rotation starts off.
 - Remembers scene, motion, enabled state, and visibility in `localStorage`.
 - Removes every node, stylesheet, listener, and inline attribute when the plugin unloads.
 
-No chat content is read and no network calls are made. Only wallpaper preferences are stored locally.
+No chat content is read and no network calls are made. Only wallpaper preferences are stored locally. `/theme` is handled entirely in the browser by DSH's client command shell; it never reaches the model.
 
 ## Install
 
@@ -69,23 +89,35 @@ Restart to return to the stock background.
 
 ## Controls
 
-Click the **Nocturne** pill in the lower-right corner to open the appearance panel. It includes scene selection, auto-cycle, animation, wallpaper visibility, and an on/off switch for the canvas layer.
+### `/theme`
 
-Scene changes also work from the keyboard. Shortcuts are ignored while typing in an input, textarea, select, or contenteditable field.
+Type `/theme` in the composer and press Enter. DSH opens its native command picker with every Nocturne scene. Type to filter, use the arrow keys to move, and press Enter or Tab to select. The current scene is marked and starts highlighted. The command appears under **Commands** in the `/` menu as **Theme** with the description *Choose a Nocturne wallpaper scene.*
+
+The command is a client-owned contribution: it consumes no model turn, sends no message, and needs no host-side command handler.
+
+### Panel
+
+Click the **Nocturne** pill in the lower-right corner to open the appearance panel. It includes scene selection grouped by sky, water, deep, and night, plus auto-cycle, animation, wallpaper visibility, and an on/off switch for the canvas layer.
+
+### Keyboard
+
+Shortcuts are ignored while typing in an input, textarea, select, or contenteditable field.
 
 | Shortcut | Action |
 | --- | --- |
-| `Alt/Option + 1–5` | Jump to Cloud Drift, Koi Pond, Jellyfish, Fireflies, or Moonlit |
+| `Alt/Option + 1–9` | Jump into the first nine scenes (five cloud studies, boats, honu, koi, whale) |
 | `Alt/Option + → / ←` | Next / previous scene |
 | `Alt/Option + 0` | Pause / resume the character animation |
 | `Alt/Option + A` | Toggle automatic scene rotation |
 
-The same controls are available from the console through `window.nocturneWallpaper`:
+### Console API
 
 ```js
-nocturneWallpaper.scenes                // ["Cloud Drift", "Koi Pond", ...]
-nocturneWallpaper.status()              // { index, name, paused, auto, enabled, visibility }
-nocturneWallpaper.show("Moonlit")       // also accepts a 0-based index
+nocturneWallpaper.scenes                // ["Cloud Drift · Sunrise", ...]
+nocturneWallpaper.catalog()             // [{ id, title, tag, group, index, active }, ...]
+nocturneWallpaper.status()              // { index, id, name, group, paused, auto, enabled, visibility }
+nocturneWallpaper.show("deepseek")      // id, title, or 0-based index
+nocturneWallpaper.show("Moonlit")
 nocturneWallpaper.next()
 nocturneWallpaper.previous()
 nocturneWallpaper.pause()
@@ -107,7 +139,7 @@ nocturneWallpaper.closePanel()
 package.json        declares dsh.bundle + dsh.client (web)
 cordis.patch.yml    inserts the plugin's Loader row
 lib/index.js        empty host half; keeps the package in the roster
-lib/client.js       browser half: canvas, scenes, controls, cleanup
+lib/client.js       browser half: canvas, scenes, controls, /theme command, cleanup
 preview/            self-contained mock DSH shell for local preview
 ```
 
@@ -120,8 +152,17 @@ At mount time the browser half:
 3. Tints the application root so the wallpaper is atmospheric rather than distracting.
 4. Mounts the shadow-DOM appearance panel and its trigger.
 5. Starts a 30 fps character-grid renderer.
+6. When DSH's `commandUi` service is present, registers the client-owned `/theme` command through `ctx.commandUi.register(...)`. The wallpaper still mounts normally in compositions without that service; only the slash command is skipped.
 
 All of it is wrapped in `ctx.effect(...)`, so a hot reload or plugin removal restores the original UI.
+
+### Scenes
+
+Each scene owns its colour, accent, caption, group, and animation. The five cloud studies share a single `CloudDrift` renderer but receive different palettes, star fields, light positions, and cloud layers. The new studies:
+
+- **Paper Boats** drifts folded paper boats and floating candles across a dark harbour.
+- **Honu Lagoon** follows a green sea turtle over sunlit lagoon caustics, sea grass, and bubbles.
+- **DeepSeek** is a blue whale rendered as a long tapered silhouette with a forked tail, pectoral fin, and a bright eye in the deep.
 
 ### Readability
 
@@ -130,19 +171,21 @@ The wallpaper sits beneath a theme-aware veil and a tinted app root. The dark th
 ## Performance
 
 - One canvas, one animation loop, and a 30 fps draw budget.
+- Only the active scene is drawn each frame; all twelve are cheap to initialise.
 - Character grid rebuilt only on resize.
 - Device pixel ratio capped at 1.6 and total canvas pixels capped at 8.5M.
 - Rendering stops while the tab is hidden.
+- The scene transition costs one snapshot plus 44 vertical strip blits for 1.35 seconds, then returns to the normal single-scene path.
 - Particle tables are seeded and reused; no network or image decoding happens while running.
 - The appearance panel is static DOM; no continuous CSS filter or backdrop-filter work is added by the plugin itself.
 
 ## Compatibility
 
-Built for DeepSeek Harness **0.2.1-rc.3** on macOS. It relies on the documented `dsh.bundle` / `dsh.client` package manifests and on the `data-ds-dark-theme` body attribute used by the shipped theme presenter. The included preview harness exercises the real browser bundle against a mock DSH shell; after installing, check the result in your own profile.
+Built for DeepSeek Harness **0.2.1-rc.3** on macOS. It relies on the documented `dsh.bundle` / `dsh.client` package manifests and on the `data-ds-dark-theme` body attribute used by the shipped theme presenter. The `/theme` command uses the documented `ctx.commandUi` client command surface; the panel and wallpaper work without it. The included preview harness exercises the real browser bundle against a mock DSH shell; after installing, check the result in your own profile.
 
 ## Local preview
 
-The preview is a mock DSH shell, not a second application. It loads the real `lib/client.js` through a minimal module-loader shim so you can inspect the wallpaper without installing the plugin.
+The preview is a mock DSH shell, not a second application. It loads the real `lib/client.js` through a minimal module-loader shim so you can inspect the wallpaper without installing the plugin. It also mocks the client command service so the `/theme` registration can be exercised; the native command popup is only rendered by DSH itself.
 
 ```sh
 cd dsh-nocturne-wallpaper
