@@ -1,6 +1,6 @@
 # Nocturne Wallpaper
 
-A small, self-contained **DeepSeek Harness web-client plugin** that paints a living ASCII wallpaper behind the chat, with a native `/theme` command and a compact appearance panel for changing it without touching code.
+A small, self-contained **DeepSeek Harness web-client plugin** that paints a living ASCII wallpaper behind the chat, with a native `/theme` command, a light-theme treatment, and a compact appearance panel for changing it without touching code.
 
 Twelve scenes rotate on a slow loop:
 
@@ -38,6 +38,13 @@ Everything is drawn on a single full-screen canvas at a capped 30 fps. Type **`/
 
 </details>
 
+<details>
+<summary>Light theme</summary>
+
+![Nocturne in the light theme, with the wallpaper still visible under a warm paper veil](docs/preview-light.png)
+
+</details>
+
 > Unofficial community plugin. Not affiliated with DeepSeek.
 
 ## What it does
@@ -45,16 +52,17 @@ Everything is drawn on a single full-screen canvas at a capped 30 fps. Type **`/
 - Mounts a fixed character-grid canvas behind the DSH web UI.
 - Registers a client-owned **`/theme`** command in DSH's slash-command menu. It opens the native searchable scene picker, grouped by **Sky**, **Water**, **Deep**, and **Night**, with the current scene highlighted. Selecting a row changes the wallpaper without creating a model message.
 - Opens a compact shadow-DOM appearance panel from the Nocturne pill in the corner.
-- Lets you pick any of the twelve scenes, toggle auto-cycle and animation, and adjust wallpaper visibility.
+- Lets you pick any of the twelve scenes, toggle auto-cycle and animation, adjust **Liveliness**, and adjust wallpaper visibility.
 - Turns the canvas layer off without uninstalling the plugin.
 - Makes the application base layer translucent so the wallpaper shows through the conversation.
-- Adds a theme-aware tint, and a light wash in the light theme, so chat text stays readable.
+- Grades the canvas and uses a warm, centre-weighted paper wash in the light theme: the art stays visible, and conversation text stays legible.
 - Keeps message bubbles and the composer slightly translucent to match.
+- Adds a subtle pointer parallax and a slow idle drift; the wallpaper leans with the cursor instead of sitting perfectly still.
 - Rotates scenes every 32 seconds.
 - Switches scenes with a 1.35 second **staggered ASCII dissolve**: the old scene is held in vertical strips that clear in a soft wave, while a thin accent seam travels across the grid.
 - Pauses automatically when the tab is hidden.
 - Respects `prefers-reduced-motion`: motion slows down and auto-rotation starts off.
-- Remembers scene, motion, enabled state, and visibility in `localStorage`.
+- Remembers scene, motion, liveliness, enabled state, and visibility in `localStorage`.
 - Removes every node, stylesheet, listener, and inline attribute when the plugin unloads.
 
 No chat content is read and no network calls are made. Only wallpaper preferences are stored locally. `/theme` is handled entirely in the browser by DSH's client command shell; it never reaches the model.
@@ -97,7 +105,9 @@ The command is a client-owned contribution: it consumes no model turn, sends no 
 
 ### Panel
 
-Click the **Nocturne** pill in the lower-right corner to open the appearance panel. It includes scene selection grouped by sky, water, deep, and night, plus auto-cycle, animation, wallpaper visibility, and an on/off switch for the canvas layer.
+Click the **Nocturne** pill in the lower-right corner to open the appearance panel. It includes scene selection grouped by sky, water, deep, and night, plus auto-cycle, animation, **Liveliness**, wallpaper visibility, and an on/off switch for the canvas layer.
+
+**Liveliness** runs from calm to animated. It changes the scene clock (the default is 75, about 23% faster than the original pace) and the strength of the pointer parallax. The setting is saved with the other preferences.
 
 ### Keyboard
 
@@ -115,7 +125,7 @@ Shortcuts are ignored while typing in an input, textarea, select, or contentedit
 ```js
 nocturneWallpaper.scenes                // ["Cloud Drift · Sunrise", ...]
 nocturneWallpaper.catalog()             // [{ id, title, tag, group, index, active }, ...]
-nocturneWallpaper.status()              // { index, id, name, group, paused, auto, enabled, visibility }
+nocturneWallpaper.status()              // { index, id, name, group, paused, auto, enabled, visibility, liveliness }
 nocturneWallpaper.show("deepseek")      // id, title, or 0-based index
 nocturneWallpaper.show("Moonlit")
 nocturneWallpaper.next()
@@ -129,6 +139,7 @@ nocturneWallpaper.enable()              // show the canvas layer
 nocturneWallpaper.disable()             // hide the canvas layer
 nocturneWallpaper.toggleEnabled()
 nocturneWallpaper.setVisibility(78)     // 0-100; higher makes the wallpaper stronger
+nocturneWallpaper.setLiveliness(90)     // 0-100; animation speed and parallax strength
 nocturneWallpaper.openPanel()
 nocturneWallpaper.closePanel()
 ```
@@ -149,10 +160,11 @@ At mount time the browser half:
 
 1. Appends `#nocturne-canvas` and `#nocturne-wash` to the body at negative z-index.
 2. Sets `data-nocturne="on"` on the body and makes the UI base layer translucent.
-3. Tints the application root so the wallpaper is atmospheric rather than distracting.
+3. Applies a theme-aware grade and tint so the wallpaper is atmospheric rather than distracting.
 4. Mounts the shadow-DOM appearance panel and its trigger.
 5. Starts a 30 fps character-grid renderer.
-6. When DSH's `commandUi` service is present, registers the client-owned `/theme` command through `ctx.commandUi.register(...)`. The wallpaper still mounts normally in compositions without that service; only the slash command is skipped.
+6. Smooths pointer position into a subtle parallax, scaled by **Liveliness** and disabled under reduced motion.
+7. When DSH's `commandUi` service is present, registers the client-owned `/theme` command through `ctx.commandUi.register(...)`. The wallpaper still mounts normally in compositions without that service; only the slash command is skipped.
 
 All of it is wrapped in `ctx.effect(...)`, so a hot reload or plugin removal restores the original UI.
 
@@ -166,7 +178,9 @@ Each scene owns its colour, accent, caption, group, and animation. The five clou
 
 ### Readability
 
-The wallpaper sits beneath a theme-aware veil and a tinted app root. The dark theme uses a subtle dark tint; the light theme uses a warm paper wash so dark text remains legible. Bubble and composer surfaces are kept at high opacity. The **Wallpaper visibility** slider adjusts that tint; scene selection and motion live in the same panel. If you want to tune the effect further, override `--nocturne-app-tint` after the plugin's stylesheet in your own theme CSS.
+The wallpaper sits beneath a theme-aware veil and a tinted app root. The dark theme uses a subtle dark tint. The light theme is handled differently: the root tint drops to a low alpha, the canvas gets a slight brightness and saturation grade, the HTML underlay changes from black to warm paper, and a centre-weighted cream wash keeps the chat column readable while leaving the edges of the scene visible. Bubble and composer surfaces stay high-opacity white. The **Wallpaper visibility** slider reduces both the root tint and the light wash, so higher values reveal more art.
+
+If you want to tune the effect further, override `--nocturne-app-tint` after the plugin's stylesheet in your own theme CSS; `--nocturne-underlay` controls the colour behind the canvas.
 
 ## Performance
 
@@ -177,6 +191,7 @@ The wallpaper sits beneath a theme-aware veil and a tinted app root. The dark th
 - Rendering stops while the tab is hidden.
 - The scene transition costs one snapshot plus 44 vertical strip blits for 1.35 seconds, then returns to the normal single-scene path.
 - Particle tables are seeded and reused; no network or image decoding happens while running.
+- Pointer parallax is a passive listener updating two numbers; the eased values are applied inside the existing draw call.
 - The appearance panel is static DOM; no continuous CSS filter or backdrop-filter work is added by the plugin itself.
 
 ## Compatibility

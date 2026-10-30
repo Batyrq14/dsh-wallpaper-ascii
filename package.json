@@ -1,7 +1,7 @@
 {
   "name": "dsh-nocturne-wallpaper",
-  "version": "0.3.0",
-  "description": "A living, full-screen ASCII wallpaper for DeepSeek Harness — twelve looping scenes and a native /theme scene picker, rendered behind the chat.",
+  "version": "0.3.1",
+  "description": "A living, full-screen ASCII wallpaper for DeepSeek Harness — twelve looping scenes, light-theme handling, a Liveliness control, and a native /theme picker.",
   "private": false,
   "type": "module",
   "main": "lib/index.js",
@@ -20,7 +20,8 @@
     "docs/preview.png",
     "docs/preview-panel.png",
     "docs/preview-honu.png",
-    "docs/preview-deepseek.png"
+    "docs/preview-deepseek.png",
+    "docs/preview-light.png"
   ],
   "keywords": [
     "deepseek-harness",
@@ -31,7 +32,8 @@
     "background",
     "ascii",
     "ambient",
-    "command"
+    "command",
+    "light-theme"
   ],
   "license": "MIT",
   "dsh": {
