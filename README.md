@@ -55,11 +55,12 @@ Everything is drawn on a single full-screen canvas at a capped 30 fps. Type **`/
 - Lets you pick any of the twelve scenes, toggle auto-cycle and animation, adjust **Liveliness**, and adjust wallpaper visibility.
 - Turns the canvas layer off without uninstalling the plugin.
 - Makes the application base layer translucent so the wallpaper shows through the conversation.
-- Grades the canvas and uses a warm, centre-weighted paper wash in the light theme: the art stays visible, and conversation text stays legible.
+- Keeps the chat column quiet: subjects are composed toward the sides and upper half, glyphs thin out behind the conversation, and a soft centre-weighted wash (deep shade in the dark theme, warm paper in the light theme) keeps text legible while the edges stay rich.
 - Keeps message bubbles and the composer slightly translucent to match.
-- Adds a subtle pointer parallax and a slow idle drift; the wallpaper leans with the cursor instead of sitting perfectly still.
+- Adds a subtle, layered pointer parallax and a slow idle drift: far layers lag, near layers lead, and clouds, boats, and creatures bob at their own rhythms. Fireflies, lanterns, the sun, the moon, and jellyfish breathe with a soft brightness pulse.
+- Keeps **Mote**, a tiny pixel-art creature, on a ledge in the lower-right corner across every scene. It wanders, hops, and blinks.
 - Rotates scenes every 32 seconds.
-- Switches scenes with a 1.35 second **staggered ASCII dissolve**: the old scene is held in vertical strips that clear in a soft wave, while a thin accent seam travels across the grid.
+- Switches scenes with a 1.05 second **staggered ASCII dissolve**: the old scene is held in two-glyph vertical strips that clear in a soft wave, so the background colour blends smoothly, while a faint accent light rides the leading edge.
 - Pauses automatically when the tab is hidden.
 - Respects `prefers-reduced-motion`: motion slows down and auto-rotation starts off.
 - Remembers scene, motion, liveliness, enabled state, and visibility in `localStorage`.
@@ -178,7 +179,7 @@ Each scene owns its colour, accent, caption, group, and animation. The five clou
 
 ### Readability
 
-The wallpaper sits beneath a theme-aware veil and a tinted app root. The dark theme uses a subtle dark tint. The light theme is handled differently: the root tint drops to a low alpha, the canvas gets a slight brightness and saturation grade, the HTML underlay changes from black to warm paper, and a centre-weighted cream wash keeps the chat column readable while leaving the edges of the scene visible. Bubble and composer surfaces stay high-opacity white. The **Wallpaper visibility** slider reduces both the root tint and the light wash, so higher values reveal more art.
+The wallpaper sits beneath a theme-aware veil and a tinted app root. Inside the canvas, a quarter-resolution copy of each scene's background is masked to a soft ellipse and drawn over the glyphs, which lowers their contrast behind the chat without flattening the sky gradient. Scenes also read a centre-weighted field to thin their own glyphs there. The dark theme adds a layered, eased shade that is strongest behind the conversation. The light theme is handled differently: the root tint drops to a low alpha, the canvas gets an airy, warm brightness and saturation grade, the HTML underlay changes from black to warm paper, and a centre-weighted cream wash keeps the chat column readable while leaving the edges of the scene visible. Bubble and composer surfaces stay high-opacity white. The **Wallpaper visibility** slider reduces both the root tint and the light wash, so higher values reveal more art.
 
 If you want to tune the effect further, override `--nocturne-app-tint` after the plugin's stylesheet in your own theme CSS; `--nocturne-underlay` controls the colour behind the canvas.
 
@@ -189,7 +190,8 @@ If you want to tune the effect further, override `--nocturne-app-tint` after the
 - Character grid rebuilt only on resize.
 - Device pixel ratio capped at 1.6 and total canvas pixels capped at 8.5M.
 - Rendering stops while the tab is hidden.
-- The scene transition costs one snapshot plus 44 vertical strip blits for 1.35 seconds, then returns to the normal single-scene path.
+- The scene transition costs one snapshot plus one strip blit per two glyph columns for about a second, then returns to the normal single-scene path.
+- The centre quiet plate is one quarter-resolution canvas, rebuilt only on scene, theme, visibility, or size changes, and costs one scaled blit per frame.
 - Particle tables are seeded and reused; no network or image decoding happens while running.
 - Pointer parallax is a passive listener updating two numbers; the eased values are applied inside the existing draw call.
 - The appearance panel is static DOM; no continuous CSS filter or backdrop-filter work is added by the plugin itself.
