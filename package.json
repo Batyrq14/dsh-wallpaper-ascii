@@ -1,6 +1,6 @@
 {
   "name": "dsh-nocturne-wallpaper",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A living, full-screen ASCII wallpaper for DeepSeek Harness — twelve looping scenes, light-theme handling, a Liveliness control, and a native /theme picker.",
   "private": false,
   "type": "module",

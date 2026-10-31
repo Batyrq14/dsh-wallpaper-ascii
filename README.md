@@ -60,7 +60,8 @@ Everything is drawn on a single full-screen canvas at a capped 30 fps. Type **`/
 - Adds a subtle, layered pointer parallax and a slow idle drift: far layers lag, near layers lead, and clouds, boats, and creatures bob at their own rhythms. Fireflies, lanterns, the sun, the moon, and jellyfish breathe with a soft brightness pulse.
 - Keeps **Mote**, a tiny pixel-art creature, on a ledge in the lower-right corner across every scene. It wanders, hops, and blinks.
 - Rotates scenes every 32 seconds.
-- Switches scenes with a 1.05 second **staggered ASCII dissolve**: the old scene is held in two-glyph vertical strips that clear in a soft wave, so the background colour blends smoothly, while a faint accent light rides the leading edge.
+- Draws every subject as **glyph tiles**: each cell is a small rounded key with a character pressed into it, so clouds, koi, the honu, jellyfish, boats, the whale, and the moon read as a soft mosaic over a faint background grid.
+- Switches scenes with a 1.05 second **staggered ASCII dissolve**: the old scene is held in 44 vertical strips that clear in a soft, overlapping wave, so the background colour blends smoothly, while a thin accent seam of characters rides the leading edge.
 - Pauses automatically when the tab is hidden.
 - Respects `prefers-reduced-motion`: motion slows down and auto-rotation starts off.
 - Remembers scene, motion, liveliness, enabled state, and visibility in `localStorage`.
@@ -171,7 +172,7 @@ All of it is wrapped in `ctx.effect(...)`, so a hot reload or plugin removal res
 
 ### Scenes
 
-Each scene owns its colour, accent, caption, group, and animation. The five cloud studies share a single `CloudDrift` renderer but receive different palettes, star fields, light positions, and cloud layers. The new studies:
+Each scene owns its colour, accent, caption, group, and animation. Shared helpers draw the common elements (tiles, star fields, rising particles, caustics, ripples, light shafts, ridges, birds, and tile clouds), so scenes only describe what makes them different. The five cloud studies share a single `CloudDrift` renderer but receive different palettes, star fields, light positions, and cloud layers. The new studies:
 
 - **Paper Boats** drifts folded paper boats and floating candles across a dark harbour.
 - **Honu Lagoon** follows a green sea turtle over sunlit lagoon caustics, sea grass, and bubbles.
@@ -190,7 +191,8 @@ If you want to tune the effect further, override `--nocturne-app-tint` after the
 - Character grid rebuilt only on resize.
 - Device pixel ratio capped at 1.6 and total canvas pixels capped at 8.5M.
 - Rendering stops while the tab is hidden.
-- The scene transition costs one snapshot plus one strip blit per two glyph columns for about a second, then returns to the normal single-scene path.
+- The scene transition costs one snapshot plus 44 strip blits for about a second, then returns to the normal single-scene path.
+- Tiles are cached sprites, one per colour, so a mosaic cell is a single `drawImage` plus its glyph. Busy scenes measure about 1–2 ms of canvas work per frame.
 - The centre quiet plate is one quarter-resolution canvas, rebuilt only on scene, theme, visibility, or size changes, and costs one scaled blit per frame.
 - Particle tables are seeded and reused; no network or image decoding happens while running.
 - Pointer parallax is a passive listener updating two numbers; the eased values are applied inside the existing draw call.
