@@ -2,7 +2,7 @@
 
 A small, self-contained **DeepSeek Harness web-client plugin** that paints a living ASCII wallpaper behind the chat, with a native `/theme` command, a light-theme treatment, and a compact appearance panel for changing it without touching code.
 
-Twelve scenes rotate on a slow loop:
+Thirteen scenes rotate on a slow loop:
 
 - **Cloud Drift** in five lights: **Sunrise**, **Afternoon**, **Dusk**, **Evening**, and **Night**
 - **Paper Boats**
@@ -12,6 +12,7 @@ Twelve scenes rotate on a slow loop:
 - **Jellyfish**
 - **Fireflies**
 - **Moonlit**
+- **Clawd** — a small pixel companion taking a break from the terminal
 
 Everything is drawn on a single full-screen canvas at a capped 30 fps. Type **`/theme`** in the DSH composer for the native scene picker, or open the **Nocturne** pill in the lower-right corner. At runtime the plugin uses no images, videos, web fonts, or network requests, and the package needs no build step.
 
@@ -39,6 +40,13 @@ Everything is drawn on a single full-screen canvas at a capped 30 fps. Type **`/
 </details>
 
 <details>
+<summary>Clawd, the pixel companion</summary>
+
+![Clawd at his terminal behind the chat](docs/preview-clawd.png)
+
+</details>
+
+<details>
 <summary>Light theme</summary>
 
 ![Nocturne in the light theme, with the wallpaper still visible under a warm paper veil](docs/preview-light.png)
@@ -47,12 +55,14 @@ Everything is drawn on a single full-screen canvas at a capped 30 fps. Type **`/
 
 > Unofficial community plugin. Not affiliated with DeepSeek.
 
+The **Clawd** scene is unofficial fan art inspired by [alwinecor/clawd-stickers](https://github.com/alwinecor/clawd-stickers), used under its MIT-licensed contributor work. Clawd is the Claude Code mascot; rights in the character belong to Anthropic and are not covered by that project's MIT license. This plugin is not affiliated with or endorsed by Anthropic or the Clawd Stickers authors. See [NOTICE.md](NOTICE.md).
+
 ## What it does
 
 - Mounts a fixed character-grid canvas behind the DSH web UI.
-- Registers a client-owned **`/theme`** command in DSH's slash-command menu. It opens the native searchable scene picker, grouped by **Sky**, **Water**, **Deep**, and **Night**, with the current scene highlighted. Selecting a row changes the wallpaper without creating a model message.
+- Registers a client-owned **`/theme`** command in DSH's slash-command menu. It opens the native searchable scene picker, grouped by **Sky**, **Water**, **Deep**, **Night**, and **Mascot**, with the current scene highlighted. Selecting a row changes the wallpaper without creating a model message.
 - Opens a compact shadow-DOM appearance panel from the Nocturne pill in the corner.
-- Lets you pick any of the twelve scenes, toggle auto-cycle and animation, adjust **Liveliness**, and adjust wallpaper visibility.
+- Lets you pick any of the thirteen scenes, toggle auto-cycle and animation, adjust **Liveliness**, and adjust wallpaper visibility.
 - Turns the canvas layer off without uninstalling the plugin.
 - Makes the application base layer translucent so the wallpaper shows through the conversation.
 - Keeps the chat column quiet: subjects are composed toward the sides and upper half, glyphs thin out behind the conversation, and a soft centre-weighted wash (deep shade in the dark theme, warm paper in the light theme) keeps text legible while the edges stay rich.
@@ -177,6 +187,7 @@ Each scene owns its colour, accent, caption, group, and animation. Shared helper
 - **Paper Boats** drifts folded paper boats and floating candles across a dark harbour.
 - **Honu Lagoon** follows a green sea turtle over sunlit lagoon caustics, sea grass, and bubbles.
 - **DeepSeek** is a blue whale rendered as a long tapered silhouette with a forked tail, pectoral fin, and a bright eye in the deep.
+- **Clawd** is a code-drawn pixel mascot sitting on a glowing platform with a floating terminal, a mug, blinking eyes, a breathing body, and the occasional speech bubble.
 
 ### Readability
 
@@ -187,7 +198,7 @@ If you want to tune the effect further, override `--nocturne-app-tint` after the
 ## Performance
 
 - One canvas, one animation loop, and a 30 fps draw budget.
-- Only the active scene is drawn each frame; all twelve are cheap to initialise.
+- Only the active scene is drawn each frame; all thirteen are cheap to initialise.
 - Character grid rebuilt only on resize.
 - Device pixel ratio capped at 1.6 and total canvas pixels capped at 8.5M.
 - Rendering stops while the tab is hidden.
@@ -197,6 +208,13 @@ If you want to tune the effect further, override `--nocturne-app-tint` after the
 - Particle tables are seeded and reused; no network or image decoding happens while running.
 - Pointer parallax is a passive listener updating two numbers; the eased values are applied inside the existing draw call.
 - The appearance panel is static DOM; no continuous CSS filter or backdrop-filter work is added by the plugin itself.
+
+## Credits
+
+- **Clawd scene** — unofficial fan art inspired by [alwinecor/clawd-stickers](https://github.com/alwinecor/clawd-stickers), the pixel sticker collection. The scene is drawn in code rather than using the repository's GIFs. The source project's contributor content is MIT-licensed; the Clawd / Claude Code character rights are excluded and remain with Anthropic.
+- **Nocturne** — original plugin code and the other twelve scenes.
+
+See [NOTICE.md](NOTICE.md) for the full fan-art notice.
 
 ## Compatibility
 

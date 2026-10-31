@@ -1,7 +1,7 @@
 {
   "name": "dsh-nocturne-wallpaper",
-  "version": "0.5.0",
-  "description": "A living, full-screen ASCII wallpaper for DeepSeek Harness — twelve looping scenes, light-theme handling, a Liveliness control, and a native /theme picker.",
+  "version": "0.6.0",
+  "description": "A living, full-screen ASCII wallpaper for DeepSeek Harness — thirteen looping scenes, an unofficial pixel Clawd mascot, light-theme handling, Liveliness, and a native /theme picker.",
   "private": false,
   "type": "module",
   "main": "lib/index.js",
@@ -16,11 +16,13 @@
     "lib/client.js",
     "cordis.patch.yml",
     "README.md",
+    "NOTICE.md",
     "LICENSE",
     "docs/preview.png",
     "docs/preview-panel.png",
     "docs/preview-honu.png",
     "docs/preview-deepseek.png",
+    "docs/preview-clawd.png",
     "docs/preview-light.png"
   ],
   "keywords": [
@@ -33,7 +35,9 @@
     "ascii",
     "ambient",
     "command",
-    "light-theme"
+    "light-theme",
+    "mascot",
+    "clawd"
   ],
   "license": "MIT",
   "dsh": {
